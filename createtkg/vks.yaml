@@ -1,1 +1,40 @@
-
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: argocluster01
+  namespace: tkgcluster01
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 192.168.156.0/20
+    services:
+      cidrBlocks:
+        - 10.96.0.0/12
+    serviceDomain: cluster.local
+  topology:
+    class: builtin-generic-v3.3.0
+    version: v1.33.1---vmware.1-fips-vkr.2
+    variables:
+      - name: kubernetes
+        value:
+          certificateRotation:
+            enabled: true
+            renewalDaysBeforeExpiry: 90
+      - name: vmClass
+        value: best-effort-medium
+      - name: storageClass
+        value: vcfa-vi01-dc01-optimal-datastore-default-policy-raid5
+    controlPlane:
+      replicas: 1
+      metadata:
+        annotations:
+          run.tanzu.vmware.com/resolve-os-image: os-name=photon, content-library=cl-4dbd1b53882f89365
+    workers:
+      machineDeployments:
+        - class: node-pool
+          name: argocluster01-nodepool-dopy
+          replicas: 1
+          metadata:
+            annotations:
+              run.tanzu.vmware.com/resolve-os-image: os-name=photon, content-library=cl-4dbd1b53882f89365
